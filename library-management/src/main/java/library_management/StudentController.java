@@ -25,9 +25,9 @@ public class StudentController {
     @GetMapping("/{id}")
     public Student getStudentById(@PathVariable Integer id) {
         return students.stream()
-                .filter(s -> s.getId() == id)
+                .filter(s -> s.getId().equals(id))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(()-> new StudentNotFoundException(id));
     }
 
     @PostMapping
@@ -39,20 +39,24 @@ public class StudentController {
 
     @PutMapping("/{id}")
     public Student updateStudent(@PathVariable Integer id, @RequestBody Student updated) {
-        for (Student s : students) {
-            if (s.getId() == id) {
-                s.setName(updated.getName());
-                s.setAge(updated.getAge());
-                s.setEmail(updated.getEmail());
-                return s;
-            }
-        }
-        return null;
+        Student existing = students.stream()
+                .filter(s -> s.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new StudentNotFoundException(id));
+        existing.setName(updated.getName());
+        existing.setAge(updated.getAge());
+        existing.setEmail(updated.getEmail());
+        return existing;
     }
 
     @DeleteMapping("/{id}")
     public String deleteStudent(@PathVariable Integer id) {
-        students.removeIf(s -> s.getId() == id);
+        Student existing = students.stream()
+                .filter(s -> s.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new StudentNotFoundException(id));
+        students.remove(existing);
         return "Student with id " + id + " deleted successfully";
     }
+
 }
