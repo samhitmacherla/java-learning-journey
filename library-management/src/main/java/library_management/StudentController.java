@@ -3,6 +3,7 @@ package library_management;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/students")
@@ -31,14 +32,14 @@ public class StudentController {
     }
 
     @PostMapping
-    public Student createStudent(@RequestBody Student student) {
+    public Student createStudent(@Valid @RequestBody Student student) {
         student.setId(nextId++);
         students.add(student);
         return student;
     }
 
     @PutMapping("/{id}")
-    public Student updateStudent(@PathVariable Integer id, @RequestBody Student updated) {
+    public Student updateStudent(@PathVariable Integer id,@Valid @RequestBody Student updated) {
         Student existing = students.stream()
                 .filter(s -> s.getId().equals(id))
                 .findFirst()
