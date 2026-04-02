@@ -1,62 +1,52 @@
 package library_management;
 
-import jakarta.validation.Valid;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import org.springframework.stereotype.Service;
+
+
+
 import java.util.List;
 
 @Service
 public class StudentService {
-    private List<Student> students = new ArrayList<>();
-    private int nextId = 1;
+    private  final StudentRepository studentRepository;
 
-    public StudentService() {
-        students.add(new Student(nextId++, "Samhit", 21, "samhit@gmail.com"));
-        students.add(new Student(nextId++, "Rahul", 22, "rahul@gmail.com"));
-        students.add(new Student(nextId++, "Priya", 20, "priya@gmail.com"));
+    public StudentService(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
     }
 
 
     public List<Student> getAllStudents() {
-        return students;
+        return studentRepository.findAll();
     }
 
 
-    public Student getStudentById(@PathVariable Integer id) {
-        return students.stream()
-                .filter(s -> s.getId().equals(id))
-                .findFirst()
-                .orElseThrow(()-> new StudentNotFoundException(id));
+    public Student getStudentById(Integer id) {
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException(id));
     }
 
 
-    public Student createStudent(@Valid @RequestBody Student student) {
-        student.setId(nextId++);
-        students.add(student);
-        return student;
+
+    public Student createStudent(Student student) {
+        return studentRepository.save(student);
     }
 
 
-    public Student updateStudent(@PathVariable Integer id,@Valid @RequestBody Student updated) {
-        Student existing = students.stream()
-                .filter(s -> s.getId().equals(id))
-                .findFirst()
+    public Student updateStudent(Integer id, Student updated) {
+        Student existing = studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(id));
         existing.setName(updated.getName());
         existing.setAge(updated.getAge());
         existing.setEmail(updated.getEmail());
-        return existing;
+        return studentRepository.save(existing);
     }
 
 
-    public String deleteStudent(@PathVariable Integer id) {
-        Student existing = students.stream()
-                .filter(s -> s.getId().equals(id))
-                .findFirst()
+    public String deleteStudent(Integer id) {
+        Student existing = studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(id));
-        students.remove(existing);
+        studentRepository.delete(existing);
         return "Student with id " + id + " deleted successfully";
     }
 }
